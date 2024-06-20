@@ -42,7 +42,6 @@ public class GameUno implements IGameUno {
                 humanPlayer.addCard(this.deck.takeCard());
             } else {
                 machinePlayer.addCard(this.deck.takeCard());
-
             }
         }
     }
@@ -111,5 +110,25 @@ public class GameUno implements IGameUno {
     @Override
     public Boolean isGameOver() {
         return null;
+    }
+
+    /**
+     * Checks if the card can be played.
+     *
+     * @param card The card to check.
+     * @return True if the card can be played; otherwise, false.
+     */
+    public boolean canPlayCard(Card card) {
+        if (this.table.getCardsTable().isEmpty()) {
+            System.err.println("Error: No hay cartas en la mesa");
+            return false;
+        }
+        Card currentCardOnTheTable = this.table.getCurrentCardOnTheTable();
+        if (card == null || currentCardOnTheTable == null) {
+            System.err.println("Error: La carta actual o la carta en la mesa es nula");
+            return false;
+        }
+        return (card.getColor() != null && card.getColor().equals(currentCardOnTheTable.getColor())) ||
+                (card.getValue() != null && card.getValue().equals(currentCardOnTheTable.getValue()));
     }
 }

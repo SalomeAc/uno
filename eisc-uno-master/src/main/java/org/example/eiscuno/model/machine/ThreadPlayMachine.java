@@ -6,9 +6,9 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
 public class ThreadPlayMachine extends Thread {
-    private Table table;
-    private Player machinePlayer;
-    private ImageView tableImageView;
+    private final Table table;
+    private final Player machinePlayer;
+    private final ImageView tableImageView;
     private volatile boolean hasPlayerPlayed;
 
     public ThreadPlayMachine(Table table, Player machinePlayer, ImageView tableImageView) {
@@ -18,31 +18,70 @@ public class ThreadPlayMachine extends Thread {
         this.hasPlayerPlayed = false;
     }
 
+    @Override
     public void run() {
-        while (true){
-            if(hasPlayerPlayed){
-                try{
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        while (true) {
+            synchronized (this) {
+                if (hasPlayerPlayed) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt(); // Restablecer el estado de interrupción
+                        return;
+                    }
+                    // Lógica para colocar la carta
+                    putCardOnTheTable();
+                    hasPlayerPlayed = false;
                 }
-                // Aqui iria la logica de colocar la carta
-                putCardOnTheTable();
-                hasPlayerPlayed = false;
             }
         }
     }
 
-    private void putCardOnTheTable(){
-        int index = (int) (Math.random() * machinePlayer.getCardsPlayer().size());
-        Card card = machinePlayer.getCard(index);
-        table.addCardOnTheTable(card);
-        tableImageView.setImage(card.getImage());
-        System.out.println("la máquina ha puesto su carta");
-       
+    private void putCardOnTheTable() {
+        if (machinePlayer.getCardsPlayer().isEmpty()) {
+            System.out.println("No hay cartas en la mano del jugador máquina.");
+            return;
+        }
+
+        Card cardOnTable = table.getCurrentCardOnTheTable();
+
+        System.out.println("Carta en la mesa: " + cardOnTable.getValue() + " de " + cardOnTable.getColor());
+
+        // Buscar una carta jugable
+        Card selectedCard = null;
+        int selectedIndex = -1;
+        for (int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
+            Card card = machinePlayer.getCard(i);
+
+            // Verificar si la carta es válida (no nula)
+            if (card.getValue() == null || card.getColor() == null) {
+                System.out.println("Carta inválida detectada: " + card);
+                continue;
+            }
+
+            if (card.getValue().equals(cardOnTable.getValue()) || card.getColor().equals(cardOnTable.getColor())) {
+                selectedCard = card;
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        if (selectedCard != null) {
+            System.out.println("Carta seleccionada por la máquina: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+            table.addCardOnTheTable(selectedCard);
+            tableImageView.setImage(selectedCard.getImage());
+            machinePlayer.getCardsPlayer().remove(selectedIndex);
+            System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+        } else {
+            System.out.println("No hay cartas jugables en la mano del jugador máquina.");
+        }
     }
 
-    public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
+    public synchronized void setHasPlayerPlayed(boolean hasPlayerPlayed) {
         this.hasPlayerPlayed = hasPlayerPlayed;
+    }
+
+    public boolean isHasPlayerPlayed() {
+        return hasPlayerPlayed;
     }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * Represents a player in the Uno game.
  */
-public class  Player implements IPlayer {
+public class Player implements IPlayer {
     private ArrayList<Card> cardsPlayer;
     private String typePlayer;
 

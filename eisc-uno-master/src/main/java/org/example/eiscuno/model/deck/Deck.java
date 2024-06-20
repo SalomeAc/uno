@@ -42,41 +42,48 @@ public class Deck {
     }
 
     private String getCardValue(String name) {
-        if (name.endsWith("0")){
+        if (name.contains("WILD")) {
+            return "WILD";
+        } else if (name.contains("SKIP")) {
+            return "SKIP";
+        } else if (name.contains("REVERSE")) {
+            return "REVERSE";
+        } else if (name.endsWith("0")) {
             return "0";
-        } else if (name.endsWith("1")){
+        } else if (name.endsWith("1")) {
             return "1";
-        } else if (name.endsWith("2")){
+        } else if (name.endsWith("2")) {
             return "2";
-        } else if (name.endsWith("3")){
+        } else if (name.endsWith("3")) {
             return "3";
-        } else if (name.endsWith("4")){
+        } else if (name.endsWith("4")) {
             return "4";
-        } else if (name.endsWith("5")){
+        } else if (name.endsWith("5")) {
             return "5";
-        } else if (name.endsWith("6")){
+        } else if (name.endsWith("6")) {
             return "6";
-        } else if (name.endsWith("7")){
+        } else if (name.endsWith("7")) {
             return "7";
-        } else if (name.endsWith("8")){
+        } else if (name.endsWith("8")) {
             return "8";
-        } else if (name.endsWith("9")){
+        } else if (name.endsWith("9")) {
             return "9";
         } else {
             return null;
         }
-
     }
 
-    private String getCardColor(String name){
-        if(name.startsWith("GREEN")){
+    private String getCardColor(String name) {
+        if (name.startsWith("GREEN")) {
             return "GREEN";
-        } else if(name.startsWith("YELLOW")){
+        } else if (name.startsWith("YELLOW")) {
             return "YELLOW";
-        } else if(name.startsWith("BLUE")){
+        } else if (name.startsWith("BLUE")) {
             return "BLUE";
-        } else if(name.startsWith("RED")){
+        } else if (name.startsWith("RED")) {
             return "RED";
+        } else if (name.contains("WILD")) {
+            return "WILD"; // Consideramos WILD como un color especial para simplificar
         } else {
             return null;
         }
