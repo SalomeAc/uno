@@ -75,7 +75,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck);
         threadPlayMachine.start();
     }
 
@@ -185,19 +185,21 @@ public class GameUnoController {
     @FXML
     void onHandleTakeCard(ActionEvent event) {
         if(!threadPlayMachine.isHasPlayerPlayed()){
-            this.humanPlayer.addCard(deck.takeCard());
-            System.out.println("Se añadio la carta "+deck.takeCard());
-            System.out.println("Al usuario "+humanPlayer.getCardsPlayer());
+            Card newCard = deck.takeCard();
+            this.humanPlayer.addCard(newCard);
+            System.out.println("Se añadió la carta " + newCard);
+            System.out.println("Cartas del jugador: " + humanPlayer.getCardsPlayer());
             printCardsHumanPlayer();
-        }else{
-            this.machinePlayer.addCard(deck.takeCard());
+        } else {
+            Card newCard = deck.takeCard();
+            this.machinePlayer.addCard(newCard);
+            System.out.println("Se añadió la carta " + newCard);
             printCardsMachinePlayer();
-        }System.out.println("BotonBaraja");
-
+        }
+        System.out.println("Botón Baraja");
     }
-
-    private void printCardsMachinePlayer() {
-
+    public void printCardsMachinePlayer() {
+        System.out.println("Cartas del jugador máquina: " + machinePlayer.getCardsPlayer());
     }
 
     /**

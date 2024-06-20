@@ -2,6 +2,7 @@ package org.example.eiscuno.model.machine;
 
 import javafx.scene.image.ImageView;
 import org.example.eiscuno.model.card.Card;
+import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
@@ -10,11 +11,13 @@ public class ThreadPlayMachine extends Thread {
     private final Player machinePlayer;
     private final ImageView tableImageView;
     private volatile boolean hasPlayerPlayed;
+    private final Deck deck;
 
-    public ThreadPlayMachine(Table table, Player machinePlayer, ImageView tableImageView) {
+    public ThreadPlayMachine(Table table, Player machinePlayer, ImageView tableImageView, Deck deck) {
         this.table = table;
         this.machinePlayer = machinePlayer;
         this.tableImageView = tableImageView;
+        this.deck = deck;
         this.hasPlayerPlayed = false;
     }
 
@@ -38,45 +41,56 @@ public class ThreadPlayMachine extends Thread {
     }
 
     private void putCardOnTheTable() {
-        if (machinePlayer.getCardsPlayer().isEmpty()) {
-            System.out.println("No hay cartas en la mano del jugador máquina.");
-            return;
-        }
-
-        Card cardOnTable = table.getCurrentCardOnTheTable();
-
-        System.out.println("Carta en la mesa: " + cardOnTable.getValue() + " de " + cardOnTable.getColor());
-
-        // Buscar una carta jugable
-        Card selectedCard = null;
-        int selectedIndex = -1;
-        for (int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            Card card = machinePlayer.getCard(i);
-
-            // Verificar si la carta es válida (no nula)
-            if (card.getValue() == null || card.getColor() == null) {
-                System.out.println("Carta inválida detectada: " + card);
-                continue;
+        while (true) {
+            if (machinePlayer.getCardsPlayer().isEmpty()) {
+                System.out.println("No hay cartas en la mano del jugador máquina.");
+                return;
             }
 
-            if (card.getValue().equals(cardOnTable.getValue()) || card.getColor().equals(cardOnTable.getColor())) {
-                selectedCard = card;
-                selectedIndex = i;
-                break;
-            }
-        }
+            Card cardOnTable = table.getCurrentCardOnTheTable();
 
-        if (selectedCard != null) {
-            System.out.println("Carta seleccionada por la máquina: " + selectedCard.getValue() + " de " + selectedCard.getColor());
-            table.addCardOnTheTable(selectedCard);
-            tableImageView.setImage(selectedCard.getImage());
-            machinePlayer.getCardsPlayer().remove(selectedIndex);
-            System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
-        } else {
-            System.out.println("No hay cartas jugables en la mano del jugador máquina.");
+            System.out.println("Carta en la mesa: " + cardOnTable.getValue() + " de " + cardOnTable.getColor());
+
+            // Buscar una carta jugable
+            Card selectedCard = null;
+            int selectedIndex = -1;
+            for (int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
+                Card card = machinePlayer.getCard(i);
+
+                // Verificar si la carta es válida (no nula)
+                if (card.getValue() == null || card.getColor() == null) {
+                    System.out.println("Carta inválida detectada: " + card);
+                    continue;
+                }
+
+                if (card.getValue().equals(cardOnTable.getValue()) || card.getColor().equals(cardOnTable.getColor()) || card.getColor().equals("WILD")) {
+                    selectedCard = card;
+                    selectedIndex = i;
+                    break;
+                }
+            }
+
+            if (selectedCard != null) {
+                System.out.println("Carta seleccionada por la máquina: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+                table.addCardOnTheTable(selectedCard);
+                tableImageView.setImage(selectedCard.getImage());
+                machinePlayer.getCardsPlayer().remove(selectedIndex);
+                System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+                break; // Romper el bucle si se ha jugado una carta
+            } else {
+                System.out.println("No hay cartas jugables en la mano del jugador máquina.");
+                // La máquina toma una carta del mazo
+                Card newCard = deck.takeCard();
+                if (newCard != null) {
+                    machinePlayer.addCard(newCard);
+                    System.out.println("La máquina toma una carta: " + newCard);
+                } else {
+                    System.out.println("El mazo está vacío. No se puede tomar una carta.");
+                    break; // Romper el bucle si el mazo está vacío
+                }
+            }
         }
     }
-
     public synchronized void setHasPlayerPlayed(boolean hasPlayerPlayed) {
         this.hasPlayerPlayed = hasPlayerPlayed;
     }
