@@ -27,6 +27,10 @@ public class Card {
         this.image = new Image(String.valueOf(getClass().getResource(url)));
         this.cardImageView = createCardImageView();
     }
+    @Override
+    public String toString() {
+        return value + " de " + color;
+    }
 
     /**
      * Creates and configures the ImageView for the card.

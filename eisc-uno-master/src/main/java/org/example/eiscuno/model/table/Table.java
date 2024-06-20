@@ -25,4 +25,5 @@ public class Table {
     public ArrayList<Card> getCardsTable() {
         return cardsTable;
     }
+
 }
