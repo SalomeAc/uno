@@ -53,6 +53,13 @@ public class Card {
     public ImageView getCard() {
         return cardImageView;
     }
+    public boolean isDrawTwo() {
+        return "+2".equals(value);
+    }
+
+    public boolean isDrawFour() {
+        return "+4".equals(value);
+    }
 
     /**
      * Gets the image of the card.
