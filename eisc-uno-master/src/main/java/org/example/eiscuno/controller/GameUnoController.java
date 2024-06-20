@@ -2,9 +2,11 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -27,6 +29,15 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    private BorderPane rootBorderPane;
+
+    @FXML
+    private Button barajaButton;
+
+    @FXML
+    private Button unoButton;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
@@ -43,6 +54,20 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+
+        setBackground();
+        Image barajaImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/deck_of_cards.png"));
+        BackgroundSize backgroundSize = new BackgroundSize(120, 169, false, false, true, true);
+        BackgroundImage backgroundImage = new BackgroundImage(barajaImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
+        Background background = new Background(backgroundImage);
+        barajaButton.setBackground(background);
+
+        Image unoImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/button_uno.png"));
+        BackgroundSize backgroundSizeUnoImage = new BackgroundSize(150, 200, false, false, true, false);
+        BackgroundImage backgroundUnoImage = new BackgroundImage(unoImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSizeUnoImage);
+        Background backgroundUnoButton = new Background(backgroundUnoImage);
+        unoButton.setBackground(backgroundUnoButton);
+
         this.gameUno.startGame();
         printCardsHumanPlayer();
 
@@ -52,6 +77,27 @@ public class GameUnoController {
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
         threadPlayMachine.start();
+    }
+
+    /**
+     * Sets the background image for the game.
+     */
+
+    private void setBackground() {
+        Image backgroundImage = new Image(getClass().getResource("/org/example/eiscuno/images/background_uno.png").toExternalForm());
+
+        double width = rootBorderPane.getWidth();
+        double height = rootBorderPane.getHeight();
+
+        BackgroundImage backgroundImg = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(width, height, true, true, true, true)
+        );
+
+        rootBorderPane.setBackground(new Background(backgroundImg));
     }
 
     /**
@@ -161,6 +207,6 @@ public class GameUnoController {
      */
     @FXML
     void onHandleUno(ActionEvent event) {
-        // Implement logic to handle Uno event here
+        System.out.println("Pressed Uno button");
     }
 }
