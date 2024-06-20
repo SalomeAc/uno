@@ -7,6 +7,7 @@ import javafx.scene.image.ImageView;
  * Represents a card in the Uno game.
  */
 public class Card {
+    public Image getImage;
     private String url;
     private String value;
     private String color;
@@ -64,5 +65,8 @@ public class Card {
 
     public String getColor() {
         return color;
+    }
+    public String getUrl(){
+        return url;
     }
 }
