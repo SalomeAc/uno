@@ -46,18 +46,26 @@ public class GameUno implements IGameUno {
         }
     }
 
+
     /**
      * Allows a player to draw a specified number of cards from the deck.
      *
      * @param player        The player who will draw cards.
      * @param numberOfCards The number of cards to draw.
      */
-//    @Override
-//    public void eatCard(Player player, int numberOfCards) {
-//        for (int i = 0; i < numberOfCards; i++) {
-//            player.addCard(this.deck.takeCard());
-//        }
-//    }
+
+    @Override
+    public void eatCard(Player player, int numberOfCards) {
+        for (int i = 0; i < numberOfCards; i++) {
+            player.addCard(this.deck.takeCard());
+        }
+    }
+    public boolean isCardPlayable(Card card, Card cardOnTable) {
+        return card.getValue().equals(cardOnTable.getValue()) ||
+                card.getColor().equals(cardOnTable.getColor()) ||
+                card.getColor().equals("WILD");
+    }
+
 
     /**
      * Places a card on the table during the game.

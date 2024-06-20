@@ -19,7 +19,7 @@ public interface IGameUno {
      * @param player the player who will draw the cards
      * @param numberOfCards the number of cards to be drawn
      */
-    //void eatCard(Player player, int numberOfCards);
+    void eatCard(Player player, int numberOfCards);
 
     /**
      * Plays a card in the game, adding it to the table.
@@ -28,6 +28,8 @@ public interface IGameUno {
      */
 
     void playCard(Card card, Player player);
+
+
 
     /**
      * Handles the action when a player shouts "Uno".
