@@ -52,12 +52,12 @@ public class GameUno implements IGameUno {
      * @param player        The player who will draw cards.
      * @param numberOfCards The number of cards to draw.
      */
-    @Override
-    public void eatCard(Player player, int numberOfCards) {
-        for (int i = 0; i < numberOfCards; i++) {
-            player.addCard(this.deck.takeCard());
-        }
-    }
+//    @Override
+//    public void eatCard(Player player, int numberOfCards) {
+//        for (int i = 0; i < numberOfCards; i++) {
+//            player.addCard(this.deck.takeCard());
+//        }
+//    }
 
     /**
      * Places a card on the table during the game.
@@ -65,10 +65,10 @@ public class GameUno implements IGameUno {
      * @param card The card to be placed on the table.
      */
     @Override
-    public void playCard(Card card) {
+    public void playCard(Card card, Player player) {
         this.table.addCardOnTheTable(card);
+        validateSpecialCard(card, player);
     }
-
     /**
      * Handles the scenario when a player shouts "Uno", forcing the other player to draw a card.
      *
@@ -110,6 +110,35 @@ public class GameUno implements IGameUno {
     @Override
     public Boolean isGameOver() {
         return null;
+    }
+
+    /**
+     * @param card   the card to be validated
+     * @param player the player who will be affected by the special card
+     */
+    @Override
+    public void validateSpecialCard(Card card, Player player) {
+        int numberOfCards = 0;
+
+        if(card.getValue().contains("+2")) {
+            numberOfCards = 2;
+        } else if (card.getValue().contains("+4")) {
+            numberOfCards = 4;
+        }
+
+        if(numberOfCards > 0){
+            System.out.println(player.getTypePlayer() + " have: " + player.getCardsPlayer().size() + " cards");
+        }
+
+        for (int i = 0; i < numberOfCards; i++) {
+            player.addCard(this.deck.takeCard());
+        }
+
+        if(numberOfCards > 0){
+            System.out.println(player.getTypePlayer() + " eat now: " + numberOfCards + " cards");
+            System.out.println(player.getTypePlayer() + " have now: " + player.getCardsPlayer().size() + " cards");
+        }
+
     }
 
     /**

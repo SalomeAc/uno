@@ -81,6 +81,7 @@ public class ThreadPlayMachine extends Thread {
                 System.out.println("No hay cartas jugables en la mano del jugador máquina.");
                 // La máquina toma una carta del mazo
                 Card newCard = deck.takeCard();
+
                 if (newCard != null) {
                     machinePlayer.addCard(newCard);
                     System.out.println("La máquina toma una carta: " + newCard);
@@ -88,6 +89,8 @@ public class ThreadPlayMachine extends Thread {
                     System.out.println("El mazo está vacío. No se puede tomar una carta.");
                     break; // Romper el bucle si el mazo está vacío
                 }
+
+
             }
         }
     }

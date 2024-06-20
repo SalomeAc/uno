@@ -20,6 +20,7 @@ public class Table {
             return null;
         }
         return cardsTable.get(cardsTable.size() - 1);
+
     }
 
     public ArrayList<Card> getCardsTable() {

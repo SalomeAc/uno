@@ -124,8 +124,8 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                gameUno.playCard(card);
+
+                gameUno.playCard(card, humanPlayer);
                 tableImageView.setImage(card.getImage());
                 humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                 threadPlayMachine.setHasPlayerPlayed(true);
@@ -150,6 +150,8 @@ public class GameUnoController {
         }
         return -1;
     }
+
+
 
     /**
      * Handles the "Back" button action to show the previous set of cards.
@@ -211,4 +213,6 @@ public class GameUnoController {
     void onHandleUno(ActionEvent event) {
         System.out.println("Pressed Uno button");
     }
+
+
 }

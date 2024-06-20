@@ -83,7 +83,7 @@ public class Deck {
         } else if (name.startsWith("RED")) {
             return "RED";
         } else if (name.contains("WILD")) {
-            return "WILD"; // Consideramos WILD como un color especial para simplificar
+            return "WILD";
         } else {
             return null;
         }
