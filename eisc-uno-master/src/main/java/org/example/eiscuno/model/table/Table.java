@@ -24,6 +24,9 @@ public class Table {
      */
     public void addCardOnTheTable(Card card){
         this.cardsTable.add(card);
+        System.out.println("card added to the table" );
+        System.out.println("card color: " + card.getColor());
+        System.out.println("card number: " + card.getValue());
     }
 
     /**
@@ -36,6 +39,7 @@ public class Table {
         if (cardsTable.isEmpty()) {
             throw new IndexOutOfBoundsException("There are no cards on the table.");
         }
+        System.out.println(cardsTable);
         return this.cardsTable.get(this.cardsTable.size()-1);
     }
 }

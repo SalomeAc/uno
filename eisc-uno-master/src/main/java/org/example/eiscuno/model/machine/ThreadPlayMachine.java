@@ -38,6 +38,8 @@ public class ThreadPlayMachine extends Thread {
         Card card = machinePlayer.getCard(index);
         table.addCardOnTheTable(card);
         tableImageView.setImage(card.getImage());
+        System.out.println("la máquina ha puesto su carta");
+       
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
