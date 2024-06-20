@@ -30,62 +30,67 @@ public class Deck {
                     cardEnum.name().startsWith("BLUE_") ||
                     cardEnum.name().startsWith("RED_") ||
                     cardEnum.name().startsWith("SKIP_") ||
-                    cardEnum.name().startsWith("RESERVE_") ||
+                    cardEnum.name().startsWith("REVERSE_") ||
                     cardEnum.name().startsWith("TWO_WILD_DRAW_") ||
                     cardEnum.name().equals("FOUR_WILD_DRAW") ||
                     cardEnum.name().equals("WILD")) {
                 Card card = new Card(cardEnum.getFilePath(), getCardValue(cardEnum.name()), getCardColor(cardEnum.name()));
                 deckOfCards.push(card);
+                // Print each card
+                System.out.println(card.getValue() + " " + card.getColor());
             }
         }
         Collections.shuffle(deckOfCards);
     }
 
     private String getCardValue(String name) {
-        if (name.contains("WILD")) {
+        if (name.endsWith("0")){
+            return "0";
+        } else if (name.endsWith("1")){
+            return "1";
+        } else if (name.endsWith("2")){
+            return "2";
+        } else if (name.endsWith("3")){
+            return "3";
+        } else if (name.endsWith("4")){
+            return "4";
+        } else if (name.endsWith("5")){
+            return "5";
+        } else if (name.endsWith("6")){
+            return "6";
+        } else if (name.endsWith("7")){
+            return "7";
+        } else if (name.endsWith("8")){
+            return "8";
+        } else if (name.endsWith("9")){
+            return "9";
+        } else if (name.contains("REVERSE")) {
+            return "REVERSE";
+        } else if (name.contains("TWO_WILD_DRAW")) {
+            return "+2";
+        } else if (name.equals("FOUR_WILD_DRAW")) {
+            return "+4";
+        } else if (name.equals("WILD")) {
             return "WILD";
         } else if (name.contains("SKIP")) {
             return "SKIP";
-        } else if (name.contains("REVERSE")) {
-            return "REVERSE";
-        } else if (name.endsWith("0")) {
-            return "0";
-        } else if (name.endsWith("1")) {
-            return "1";
-        } else if (name.endsWith("2")) {
-            return "2";
-        } else if (name.endsWith("3")) {
-            return "3";
-        } else if (name.endsWith("4")) {
-            return "4";
-        } else if (name.endsWith("5")) {
-            return "5";
-        } else if (name.endsWith("6")) {
-            return "6";
-        } else if (name.endsWith("7")) {
-            return "7";
-        } else if (name.endsWith("8")) {
-            return "8";
-        } else if (name.endsWith("9")) {
-            return "9";
         } else {
-            return null;
+            return "NON_VALUE";
         }
+
     }
 
-    private String getCardColor(String name) {
-        if (name.startsWith("GREEN")) {
+    private String getCardColor(String name){
+        if(name.contains("GREEN")){
             return "GREEN";
-        } else if (name.startsWith("YELLOW")) {
+        } else if(name.contains("YELLOW")){
             return "YELLOW";
-        } else if (name.startsWith("BLUE")) {
+        } else if(name.contains("BLUE")){
             return "BLUE";
-        } else if (name.startsWith("RED")) {
+        } else if(name.contains("RED")){
             return "RED";
-        } else if (name.contains("WILD")) {
-            return "WILD"; // Consideramos WILD como un color especial para simplificar
         } else {
-            return null;
+            return "NON_COLOR";
         }
     }
 
@@ -109,5 +114,8 @@ public class Deck {
      */
     public boolean isEmpty() {
         return deckOfCards.isEmpty();
+    }
+    public void setDeckOfCards(Stack<Card> deckOfCards) {
+        this.deckOfCards = deckOfCards;
     }
 }

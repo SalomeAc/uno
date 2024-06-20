@@ -50,7 +50,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
     }
 
@@ -138,17 +138,25 @@ public class GameUnoController {
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        if(!threadPlayMachine.isHasPlayerPlayed()){
+        if (!threadPlayMachine.isHasPlayerPlayed()) {
             Card newCard = deck.takeCard();
             this.humanPlayer.addCard(newCard);
             System.out.println("Se añadió la carta " + newCard);
             System.out.println("Cartas del jugador: " + humanPlayer.getCardsPlayer());
             printCardsHumanPlayer();
+            if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
+                // Ceder el turno a la máquina
+                threadPlayMachine.setHasPlayerPlayed(true);
+            }
         } else {
             Card newCard = deck.takeCard();
             this.machinePlayer.addCard(newCard);
             System.out.println("Se añadió la carta " + newCard);
             printCardsMachinePlayer();
+            if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
+                // La máquina toma una carta y no es jugable, no hacer nada especial
+                // El hilo de la máquina seguirá intentando jugar
+            }
         }
         System.out.println("Botón Baraja");
     }

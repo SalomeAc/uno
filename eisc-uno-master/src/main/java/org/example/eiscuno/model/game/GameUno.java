@@ -46,6 +46,7 @@ public class GameUno implements IGameUno {
         }
     }
 
+
     /**
      * Allows a player to draw a specified number of cards from the deck.
      *
@@ -57,6 +58,11 @@ public class GameUno implements IGameUno {
         for (int i = 0; i < numberOfCards; i++) {
             player.addCard(this.deck.takeCard());
         }
+    }
+    public boolean isCardPlayable(Card card, Card cardOnTable) {
+        return card.getValue().equals(cardOnTable.getValue()) ||
+                card.getColor().equals(cardOnTable.getColor()) ||
+                card.getColor().equals("WILD");
     }
 
     /**
