@@ -2,9 +2,11 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -33,6 +35,14 @@ public class GameUnoController {
     private Table table;
     private GameUno gameUno;
     private int posInitCardToShow;
+    @FXML
+    private BorderPane rootBorderPane;
+
+    @FXML
+    private Button barajaButton;
+
+    @FXML
+    private Button unoButton;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
@@ -43,8 +53,25 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+
+        setBackground();
+
+        Image barajaImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/deck_of_cards.png"));
+        BackgroundSize backgroundSize = new BackgroundSize(120, 169, false, false, true, true);
+        BackgroundImage backgroundImage = new BackgroundImage(barajaImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
+        Background background = new Background(backgroundImage);
+        barajaButton.setBackground(background);
+
+        Image unoImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/button_uno.png"));
+        BackgroundSize backgroundSizeUnoImage = new BackgroundSize(150, 200, false, false, true, false);
+        BackgroundImage backgroundUnoImage = new BackgroundImage(unoImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSizeUnoImage);
+        Background backgroundUnoButton = new Background(backgroundUnoImage);
+        unoButton.setBackground(backgroundUnoButton);
+
         this.gameUno.startGame();
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
+
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
@@ -52,6 +79,27 @@ public class GameUnoController {
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
+    }
+
+    /**
+     * Sets the background image for the game.
+     */
+
+    private void setBackground() {
+        Image backgroundImage = new Image(getClass().getResource("/org/example/eiscuno/images/background_uno.png").toExternalForm());
+
+        double width = rootBorderPane.getWidth();
+        double height = rootBorderPane.getHeight();
+
+        BackgroundImage backgroundImg = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(width, height, true, true, true, true)
+        );
+
+        rootBorderPane.setBackground(new Background(backgroundImg));
     }
 
     /**
@@ -65,6 +113,7 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
     }
+
 
     /**
      * Prints the human player's cards on the grid pane.
@@ -82,11 +131,24 @@ public class GameUnoController {
                 gameUno.playCard(card);
                 tableImageView.setImage(card.getImage());
                 humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+
+
                 threadPlayMachine.setHasPlayerPlayed(true);
                 printCardsHumanPlayer();
             });
-
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
+        }
+    }
+    private void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
+        Card[] currentVisibleCardsMachinePlayer = this.machinePlayer.getCardsPlayer().toArray(new Card[0]);
+
+        for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
+            ImageView newCardImageView = new ImageView(new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/card_uno.png")));
+            newCardImageView.setFitHeight(90);
+            newCardImageView.setFitWidth(70);
+            newCardImageView.setPreserveRatio(true);
+            this.gridPaneCardsMachine.add(newCardImageView, i, 0);
         }
     }
 
@@ -104,6 +166,7 @@ public class GameUnoController {
         }
         return -1;
     }
+
 
     /**
      * Handles the "Back" button action to show the previous set of cards.
@@ -152,6 +215,7 @@ public class GameUnoController {
             Card newCard = deck.takeCard();
             this.machinePlayer.addCard(newCard);
             System.out.println("Se añadió la carta " + newCard);
+            printCardsMessageMachinePlayer();
             printCardsMachinePlayer();
             if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
                 // La máquina toma una carta y no es jugable, no hacer nada especial
@@ -160,7 +224,7 @@ public class GameUnoController {
         }
         System.out.println("Botón Baraja");
     }
-    public void printCardsMachinePlayer() {
+    public void printCardsMessageMachinePlayer() {
         System.out.println("Cartas del jugador máquina: " + machinePlayer.getCardsPlayer());
     }
 

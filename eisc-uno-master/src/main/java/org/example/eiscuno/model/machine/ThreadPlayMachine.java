@@ -72,13 +72,13 @@ public class ThreadPlayMachine extends Thread {
                     break;
                 }
             }
-
             if (selectedCard != null) {
                 System.out.println("Carta seleccionada por la máquina: " + selectedCard.getValue() + " de " + selectedCard.getColor());
                 table.addCardOnTheTable(selectedCard);
                 tableImageView.setImage(selectedCard.getImage());
                 machinePlayer.getCardsPlayer().remove(selectedIndex);
                 System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+
                 break; // Romper el bucle si se ha jugado una carta
             } else {
                 System.out.println("No hay cartas jugables en la mano del jugador máquina.");

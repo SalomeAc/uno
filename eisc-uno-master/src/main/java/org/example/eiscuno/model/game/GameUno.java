@@ -16,6 +16,7 @@ public class GameUno implements IGameUno {
     private Deck deck;
     private Table table;
 
+
     /**
      * Constructs a new GameUno instance.
      *
@@ -59,10 +60,35 @@ public class GameUno implements IGameUno {
             player.addCard(this.deck.takeCard());
         }
     }
+
+
     public boolean isCardPlayable(Card card, Card cardOnTable) {
         return card.getValue().equals(cardOnTable.getValue()) ||
                 card.getColor().equals(cardOnTable.getColor()) ||
                 card.getColor().equals("WILD");
+    }
+    @Override
+    public void validateSpecialCard(Card card, Player player) {
+        int numberOfCards = 0;
+
+        if (card.getValue().contains("+2")) {
+            numberOfCards = 2;
+        } else if (card.getValue().contains("+4")) {
+            numberOfCards = 4;
+        }
+
+        if (numberOfCards > 0) {
+            System.out.println(player.getTypePlayer() + " have: " + player.getCardsPlayer().size() + " cards");
+        }
+
+        for (int i = 0; i < numberOfCards; i++) {
+            player.addCard(this.deck.takeCard());
+        }
+
+        if (numberOfCards > 0) {
+            System.out.println(player.getTypePlayer() + " eat now: " + numberOfCards + " cards");
+            System.out.println(player.getTypePlayer() + " have now: " + player.getCardsPlayer().size() + " cards");
+        }
     }
 
     /**
@@ -88,6 +114,7 @@ public class GameUno implements IGameUno {
             humanPlayer.addCard(this.deck.takeCard());
         }
     }
+
 
     /**
      * Retrieves the current visible cards of the human player starting from a specific position.
