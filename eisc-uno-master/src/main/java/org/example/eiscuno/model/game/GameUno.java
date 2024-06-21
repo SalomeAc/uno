@@ -101,6 +101,11 @@ public class GameUno implements IGameUno {
         this.table.addCardOnTheTable(card);
     }
 
+    @Override
+    public Player getCurrentPlayer() {
+        return null;
+    }
+
     /**
      * Handles the scenario when a player shouts "Uno", forcing the other player to draw a card.
      *

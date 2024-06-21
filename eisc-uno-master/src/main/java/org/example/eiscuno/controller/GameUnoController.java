@@ -77,7 +77,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
+        threadPlayMachine = new ThreadPlayMachine(this,this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
     }
 
@@ -110,6 +110,7 @@ public class GameUnoController {
         this.machinePlayer = new Player("MACHINE_PLAYER");
         this.deck = new Deck();
         this.table = new Table();
+
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
     }
@@ -139,18 +140,16 @@ public class GameUnoController {
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
-    private void printCardsMachinePlayer() {
+    public void printCardsMachinePlayer() {
         this.gridPaneCardsMachine.getChildren().clear();
         Card[] currentVisibleCardsMachinePlayer = this.machinePlayer.getCardsPlayer().toArray(new Card[0]);
 
         for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
-            ImageView newCardImageView = new ImageView(new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/card_uno.png")));
-            newCardImageView.setFitHeight(90);
-            newCardImageView.setFitWidth(70);
-            newCardImageView.setPreserveRatio(true);
-            this.gridPaneCardsMachine.add(newCardImageView, i, 0);
+            ImageView cardImageView = currentVisibleCardsMachinePlayer[i].getCardImageViewMachine();
+            this.gridPaneCardsMachine.add(cardImageView, i, 0);
         }
     }
+
 
     /**
      * Finds the position of a specific card in the human player's hand.

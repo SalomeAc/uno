@@ -27,6 +27,7 @@ public interface IGameUno {
      * @param card the card to be played
      */
     void playCard(Card card);
+    Player getCurrentPlayer();
     void validateSpecialCard(Card card, Player player);
 
     /**
