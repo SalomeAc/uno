@@ -2,6 +2,7 @@ package org.example.eiscuno.model.game;
 
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
+import org.example.eiscuno.model.designPattern.Observable;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
@@ -9,7 +10,7 @@ import org.example.eiscuno.model.table.Table;
  * Represents a game of Uno.
  * This class manages the game logic and interactions between players, deck, and the table.
  */
-public class GameUno implements IGameUno {
+public class GameUno extends Observable implements IGameUno {
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -44,6 +45,7 @@ public class GameUno implements IGameUno {
                 machinePlayer.addCard(this.deck.takeCard());
             }
         }
+        notifyObservers();
     }
 
 
@@ -59,6 +61,7 @@ public class GameUno implements IGameUno {
         for (int i = 0; i < numberOfCards; i++) {
             player.addCard(this.deck.takeCard());
         }
+        notifyObservers();
     }
     public boolean isCardPlayable(Card card, Card cardOnTable) {
         return card.getValue().equals(cardOnTable.getValue()) ||
@@ -76,6 +79,7 @@ public class GameUno implements IGameUno {
     public void playCard(Card card, Player player) {
         this.table.addCardOnTheTable(card);
         validateSpecialCard(card, player);
+        notifyObservers();
     }
     /**
      * Handles the scenario when a player shouts "Uno", forcing the other player to draw a card.
@@ -89,6 +93,7 @@ public class GameUno implements IGameUno {
         } else {
             humanPlayer.addCard(this.deck.takeCard());
         }
+        notifyObservers();
     }
 
     /**
@@ -146,6 +151,8 @@ public class GameUno implements IGameUno {
             System.out.println(player.getTypePlayer() + " eat now: " + numberOfCards + " cards");
             System.out.println(player.getTypePlayer() + " have now: " + player.getCardsPlayer().size() + " cards");
         }
+
+        notifyObservers();
 
     }
 

@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
+import org.example.eiscuno.model.designPattern.Observer;
 import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
@@ -18,7 +19,7 @@ import org.example.eiscuno.model.table.Table;
 /**
  * Controller class for the Uno game.
  */
-public class GameUnoController {
+public class GameUnoController implements Observer {
 
     @FXML
     private GridPane gridPaneCardsMachine;
@@ -69,7 +70,7 @@ public class GameUnoController {
         unoButton.setBackground(backgroundUnoButton);
 
         this.gameUno.startGame();
-        printCardsHumanPlayer();
+        this.gameUno.addObserver(this);
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
@@ -77,6 +78,9 @@ public class GameUnoController {
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
+        printCardsHumanPlayer();
+        printCardsMachinePlayer();
+
     }
 
     /**
@@ -130,11 +134,51 @@ public class GameUnoController {
                 humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                 threadPlayMachine.setHasPlayerPlayed(true);
                 printCardsHumanPlayer();
+                printCardsMachinePlayer(); // Refresh machine cards
+
+
+
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
+
+    /**
+     * Displays the machine player's cards on the grid pane.
+     * This method clears the current grid pane and adds an ImageView for each card
+     * in the machine player's hand. The cards are displayed face down.
+     */
+    private void printCardsMachinePlayer() {
+        // Clear existing cards from the grid pane
+        this.gridPaneCardsMachine.getChildren().clear();
+
+        // Get the current cards of the machine player as an array
+        Card[] currentVisibleCardsMachinePlayer = this.machinePlayer.getCardsPlayer().toArray(new Card[0]);
+
+        // Determine the number of cards to display (max 4)
+        int cardsToDisplay = Math.min(currentVisibleCardsMachinePlayer.length, 4);
+
+        // Iterate through each card and create an ImageView for it
+        for (int i = 0; i < cardsToDisplay; i++) {
+            // Create a new ImageView for the card with the placeholder image
+            ImageView newCardImageView = new ImageView(new Image(getClass().getResourceAsStream(
+                    "/org/example/eiscuno/cards-uno/card_uno.png")));
+
+            // Set the size and preserve ratio of the card image
+            newCardImageView.setFitHeight(90);
+            newCardImageView.setFitWidth(70);
+            newCardImageView.setPreserveRatio(true);
+
+            // Add the card image to the grid pane at the appropriate position
+            this.gridPaneCardsMachine.add(newCardImageView, i, 0);
+
+
+        }
+        System.out.println("Cartas de la máquina: " + machinePlayer.getCardsPlayer());
+
+    }
+
 
     /**
      * Finds the position of a specific card in the human player's hand.
@@ -200,17 +244,26 @@ public class GameUnoController {
             Card newCard = deck.takeCard();
             this.machinePlayer.addCard(newCard);
             System.out.println("Se añadió la carta " + newCard);
+            printCardsMessageMachinePlayer();
             printCardsMachinePlayer();
             if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
                 // La máquina toma una carta y no es jugable, no hacer nada especial
                 // El hilo de la máquina seguirá intentando jugar
+
             }
         }
         System.out.println("Botón Baraja");
     }
-    public void printCardsMachinePlayer() {
+
+    /**
+     * Prints the machine player's cards to the console.
+     * This method outputs a message to the console listing the cards currently held by the machine player.
+     */
+    public void printCardsMessageMachinePlayer() {
         System.out.println("Cartas del jugador máquina: " + machinePlayer.getCardsPlayer());
     }
+
+
 
     /**
      * Handles the action of saying "Uno".
@@ -220,6 +273,25 @@ public class GameUnoController {
     @FXML
     void onHandleUno(ActionEvent event) {
         System.out.println("Pressed Uno button");
+    }
+
+    /**
+     * Updates the game state when the machine plays a card.
+     * This method should be called whenever the machine player plays a card to
+     * update the display of the machine player's cards.
+     */
+    private void updateMachinePlayerCards() {
+        printCardsMachinePlayer();
+        printCardsHumanPlayer(); // Optional: Refresh human cards if needed
+    }
+
+
+    /**
+     * Update method required by Observer interface.
+     */
+    @Override
+    public void update() {
+        printCardsHumanPlayer();
     }
 
 
