@@ -10,6 +10,7 @@ import java.util.ArrayList;
  */
 public interface IPlayer {
 
+
     /**
      * Adds a card to the player's hand.
      *

@@ -53,6 +53,8 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+        this.gameUno.playCard(deck.takeCard());
+        this.tableImageView.setImage(this.table.getCurrentCardOnTheTable().getImage());
 
         setBackground();
 
@@ -145,8 +147,14 @@ public class GameUnoController {
         Card[] currentVisibleCardsMachinePlayer = this.machinePlayer.getCardsPlayer().toArray(new Card[0]);
 
         for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
-            ImageView cardImageView = currentVisibleCardsMachinePlayer[i].getCardImageViewMachine();
-            this.gridPaneCardsMachine.add(cardImageView, i, 0);
+            Card card = currentVisibleCardsMachinePlayer[i];
+            ImageView cardImageViewMachine = card.getCardImageViewMachine(); // Asegúrate de tener un método para obtener el ImageView de la carta
+
+            cardImageViewMachine.setFitHeight(90);
+            cardImageViewMachine.setFitWidth(70);
+            cardImageViewMachine.setPreserveRatio(true);
+
+            this.gridPaneCardsMachine.add(cardImageViewMachine, i, 0);
         }
     }
 

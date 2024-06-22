@@ -1,13 +1,14 @@
 package org.example.eiscuno.model.player;
 
 import org.example.eiscuno.model.card.Card;
+import org.example.eiscuno.model.game.GameUno;
 
 import java.util.ArrayList;
 
 /**
  * Represents a player in the Uno game.
  */
-public class Player implements IPlayer {
+public class  Player implements IPlayer {
     private ArrayList<Card> cardsPlayer;
     private String typePlayer;
 
@@ -28,6 +29,8 @@ public class Player implements IPlayer {
     public void addCard(Card card){
         cardsPlayer.add(card);
     }
+
+
 
     /**
      * Retrieves all cards currently held by the player.
