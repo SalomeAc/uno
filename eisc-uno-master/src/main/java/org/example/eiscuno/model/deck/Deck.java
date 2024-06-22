@@ -122,4 +122,8 @@ public class Deck {
     public void setDeckOfCards(Stack<Card> deckOfCards) {
         this.deckOfCards = deckOfCards;
     }
+    public int getRemainingCards() {
+        return deckOfCards.size();
+    }
+
 }
