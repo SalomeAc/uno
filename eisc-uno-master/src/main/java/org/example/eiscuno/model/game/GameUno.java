@@ -5,6 +5,9 @@ import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.designPattern.Observable;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import javafx.application.Platform;
+
+import org.example.eiscuno.view.ColorSelectionDialog;
 
 import java.util.List;
 
@@ -22,6 +25,9 @@ public class GameUno extends Observable implements IGameUno {
     private Player machinePlayer;
     private Deck deck;
     private Table table;
+    private String lastColorPlayed;
+
+
 
     /**
      * Constructs a new GameUno instance.
@@ -72,10 +78,36 @@ public class GameUno extends Observable implements IGameUno {
         }
         notifyObservers();
     }
+    /**
+     * Checks if the given card can be played on top of the current card on the table.
+     * @param card The card to be played.
+     * @param cardOnTable The current card on the table.
+     * @return true if the card can be played, false otherwise.
+     */
     public boolean isCardPlayable(Card card, Card cardOnTable) {
-        return card.getValue().equals(cardOnTable.getValue()) ||
+
+        if (card.getValue().equals(cardOnTable.getValue()) ||
+
                 card.getColor().equals(cardOnTable.getColor()) ||
-                card.getColor().equals("WILD") || card.getValue().equals("WILD");
+
+                card.getColor().equals("WILD") ||
+
+                card.getValue().equals("WILD")) {
+
+            return true;
+
+        }
+
+
+
+        if (lastColorPlayed != null && card.getColor().equals(lastColorPlayed)) {
+
+            return true;
+
+        }
+
+        return false;
+
     }
 
 
@@ -149,6 +181,24 @@ public class GameUno extends Observable implements IGameUno {
             numberOfCards = 2;
         } else if (card.getValue().contains("+4")) {
             numberOfCards = 4;
+
+            Platform.runLater(() -> {
+
+                ColorSelectionDialog dialog = new ColorSelectionDialog();
+
+                dialog.showAndWait();
+
+                String selectedColor = dialog.getSelectedColor();
+
+                if (selectedColor != null) {
+
+                    lastColorPlayed = selectedColor;
+
+                }
+
+            });
+
+            lastColorPlayed = table.getCurrentCardOnTheTable().getColor();
         }
 
         if(numberOfCards > 0){
@@ -159,13 +209,25 @@ public class GameUno extends Observable implements IGameUno {
             targetPlayer.addCard(this.deck.takeCard());
         }
 
+        if (card.getValue().contains("SKIP")) {
+
+            updateCurrentPlayer(); // Salta el turno del próximo jugador
+
+            updateCurrentPlayer(); // Salta el turno del jugador actual para pasar al siguiente
+
+        } else if (card.getValue().contains("REVERSE")) {
+
+            isClockwise = !isClockwise; // Cambia la dirección del juego
+
+        }
+
         if(numberOfCards > 0){
             System.out.println(targetPlayer.getTypePlayer() + " eats: " + numberOfCards + " cards");
             System.out.println(targetPlayer.getTypePlayer() + " has now: " + targetPlayer.getCardsPlayer().size() + " cards");
         }
 
         if (targetPlayer.getTypePlayer().equals("HUMAN_PLAYER")){
-
+            updateCurrentPlayer();
             notifyObservers();
         }
 

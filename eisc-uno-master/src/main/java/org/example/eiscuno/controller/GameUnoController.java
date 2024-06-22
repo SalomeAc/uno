@@ -1,12 +1,23 @@
 package org.example.eiscuno.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import java.util.concurrent.Executors;
+
+import java.util.concurrent.ScheduledExecutorService;
+
+import java.util.concurrent.ScheduledFuture;
+
+import java.util.concurrent.TimeUnit;
+import org.example.eiscuno.view.ColorSelectionDialog;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.designPattern.Observer;
@@ -15,6 +26,8 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+
+import java.util.Optional;
 
 /**
  * Controller class for the Uno game.
@@ -45,9 +58,14 @@ public class GameUnoController implements Observer {
     private Table table;
     private GameUno gameUno;
     private int posInitCardToShow;
+    private boolean isHumanTurn = true;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
-    ThreadPlayMachine threadPlayMachine;
+    private ThreadPlayMachine threadPlayMachine;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private ScheduledFuture<?> unoTask;
 
     /**
      * Initializes the controller.
@@ -56,7 +74,7 @@ public class GameUnoController implements Observer {
     public void initialize() {
         initVariables();
 
-        this.gameUno.playCard(deck.takeCard(),humanPlayer);
+        this.gameUno.playCard(deck.takeCard(), humanPlayer);
 
         this.tableImageView.setImage(this.table.getCurrentCardOnTheTable().getImage());
 
@@ -82,7 +100,7 @@ public class GameUnoController implements Observer {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this,this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
+        threadPlayMachine = new ThreadPlayMachine(this, this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
 
 
@@ -130,7 +148,7 @@ public class GameUnoController implements Observer {
     }
 
     public void validateSpecialCard(Card card, Player player) {
-        gameUno.validateSpecialCard(card, player); // Llama al método de la instancia de GameUno
+        gameUno.validateSpecialCard(card, player);
     }
 
     /**
@@ -153,11 +171,96 @@ public class GameUnoController implements Observer {
                 printCardsHumanPlayer();
                 printCardsMachinePlayer(); // Refresh machine cards
 
+                if (gameUno.isCardPlayable(card, table.getCurrentCardOnTheTable())) {
+
+                    if (card.isWild()) {
+
+                        showColorSelectionDialog(card);
+
+                    } else {
+
+                        playCard(card);
+
+                    }
+
+                }
+
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
+        System.out.println("Cartas de la máquina: " + humanPlayer.getCardsPlayer());
     }
+
+    /**
+     * Displays a color selection dialog for the user to choose a color
+     * when playing a wildcard. If the user confirms the selection,
+     * the selected color is set on the card and the card is played.
+     *
+     * @param card the card that requires a color selection
+     */
+    private void showColorSelectionDialog(Card card) {
+        ColorSelectionDialog colorSelectionDialog = new ColorSelectionDialog();
+
+        Optional<ButtonType> result = colorSelectionDialog.showAndWait();
+
+        result.ifPresent(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                String selectedColor = colorSelectionDialog.getSelectedColor();
+                card.setColor(selectedColor);
+                playCard(card);
+            }
+        });
+    }
+
+    /**
+     * Plays the specified card for the human player, updates the table image,
+     * removes the card from the human player's hand, and sets the flag indicating
+     * that the player has played. It also updates the displayed cards for both players
+     * and checks for a winner.
+     *
+     * @param card the card to be played
+     */
+    private void playCard(Card card) {
+        gameUno.playCard(card, humanPlayer);
+        tableImageView.setImage(card.getImage());
+        humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+        printCardsHumanPlayer();
+        printCardsMachinePlayer();
+        checkForWinner();
+
+        if (card.getValue().equals("SKIP")) {
+            System.out.println("Played SKIP card. Turn continues for the same player.");
+            if (isHumanTurn) {
+                // Human player plays again
+                startUnoTimerIfNeeded();
+            } else {
+                // Machine player plays again
+                threadPlayMachine.setHasPlayerPlayed(true);
+            }
+        } else {
+            if (isHumanTurn) {
+                isHumanTurn = false;
+                threadPlayMachine.setHasPlayerPlayed(true);
+            } else {
+                isHumanTurn = true;
+            }
+        }
+
+        startUnoTimerIfNeeded();
+    }
+
+
+
+    private void startUnoTimerIfNeeded() {
+
+        if (isHumanTurn && humanPlayer.getCardsPlayer().size() == 1) {
+
+            startUnoTimer();
+
+        }
+    }
+
 
     /**
      * Displays the machine player's cards on the grid pane.
@@ -184,9 +287,8 @@ public class GameUnoController implements Observer {
 
             cardImageViewMachine.setPreserveRatio(true);
 
-            ImageView cardImageView = currentVisibleCardsMachinePlayer[i].getCardImageViewMachine();
+            this.gridPaneCardsMachine.add(cardImageViewMachine, i, 0);
 
-            this.gridPaneCardsMachine.add(cardImageView, i, 0);
 
 
         }
@@ -285,8 +387,43 @@ public class GameUnoController implements Observer {
      * @param event the action event
      */
     @FXML
+
     void onHandleUno(ActionEvent event) {
         System.out.println("Pressed Uno button");
+        if (unoTask != null && !unoTask.isDone()) {
+            unoTask.cancel(true);
+            System.out.println("UNO button pressed in time!");
+        }
+    }
+
+    private void startUnoTimer() {
+        unoTask = scheduler.schedule(() -> {
+            Platform.runLater(() -> {
+                System.out.println("UNO button not pressed in time. Adding penalty cards.");
+                addPenaltyCards(humanPlayer, 2);
+            });
+        }, 2, TimeUnit.SECONDS);
+    }
+
+
+
+    //Método penaliza sino toca el botón max en 2s
+
+    private void addPenaltyCards(Player player, int numberOfCards) {
+
+        for (int i = 0; i < numberOfCards; i++) {
+
+            Card newCard = deck.takeCard();
+
+            if (newCard != null) {
+
+                player.addCard(newCard);
+
+            }
+
+        }
+
+        printCardsHumanPlayer(); // Actualizar la interfaz gráfica
 
     }
 
@@ -298,6 +435,37 @@ public class GameUnoController implements Observer {
     public void update() {
         printCardsHumanPlayer();
     }
+
+    /**
+     * Checks if there is a winner in the game.
+     * If the human player has no cards left, displays a congratulatory message.
+     * If the machine player has no cards left, displays a message indicating the machine has won.
+     */
+    private void checkForWinner() {
+        if (humanPlayer.getCardsPlayer().isEmpty()) {
+            showAlert("Felicidades", "¡Ganaste el juego!");
+        } else if (machinePlayer.getCardsPlayer().isEmpty()) {
+            showAlert("Lo siento", "La máquina ganó.");
+        }
+    }
+
+    /**
+     * Displays an alert with the given title and message.
+     * The alert is shown on the JavaFX application thread.
+     *
+     * @param title   the title of the alert
+     * @param message the message content of the alert
+     */
+    private void showAlert(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+
 
 
 }
