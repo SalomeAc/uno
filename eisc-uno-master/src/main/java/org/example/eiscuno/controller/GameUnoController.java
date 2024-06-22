@@ -1,8 +1,11 @@
 package org.example.eiscuno.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -15,10 +18,10 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.view.ColorSelectionDialog;
 
-/**
- * Controller class for the Uno game.
- */
+import java.util.Optional;
+
 public class GameUnoController implements Observer {
 
     @FXML
@@ -49,17 +52,11 @@ public class GameUnoController implements Observer {
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
-    /**
-     * Initializes the controller.
-     */
     @FXML
     public void initialize() {
         initVariables();
-
-        this.gameUno.playCard(deck.takeCard(),humanPlayer);
-
+        this.gameUno.playCard(deck.takeCard(), humanPlayer);
         this.tableImageView.setImage(this.table.getCurrentCardOnTheTable().getImage());
-
         setBackground();
         Image barajaImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/deck_of_cards.png"));
         BackgroundSize backgroundSize = new BackgroundSize(120, 169, false, false, true, true);
@@ -82,10 +79,8 @@ public class GameUnoController implements Observer {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this,this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
+        threadPlayMachine = new ThreadPlayMachine(this, this.table, this.machinePlayer, this.tableImageView, this.deck, this.gameUno);
         threadPlayMachine.start();
-
-
     }
 
     public GameUnoController(GameUno gameUno) {
@@ -94,18 +89,10 @@ public class GameUnoController implements Observer {
 
     public GameUnoController() {}
 
-
-
-    /**
-     * Sets the background image for the game.
-     */
-
     private void setBackground() {
         Image backgroundImage = new Image(getClass().getResource("/org/example/eiscuno/images/background_uno.png").toExternalForm());
-
         double width = rootBorderPane.getWidth();
         double height = rootBorderPane.getHeight();
-
         BackgroundImage backgroundImg = new BackgroundImage(
                 backgroundImage,
                 BackgroundRepeat.NO_REPEAT,
@@ -113,13 +100,9 @@ public class GameUnoController implements Observer {
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(width, height, true, true, true, true)
         );
-
         rootBorderPane.setBackground(new Background(backgroundImg));
     }
 
-    /**
-     * Initializes the variables for the game.
-     */
     private void initVariables() {
         this.humanPlayer = new Player("HUMAN_PLAYER");
         this.machinePlayer = new Player("MACHINE_PLAYER");
@@ -130,12 +113,9 @@ public class GameUnoController implements Observer {
     }
 
     public void validateSpecialCard(Card card, Player player) {
-        gameUno.validateSpecialCard(card, player); // Llama al método de la instancia de GameUno
+        gameUno.validateSpecialCard(card, player);
     }
 
-    /**
-     * Prints the human player's cards on the grid pane.
-     */
     private void printCardsHumanPlayer() {
         this.gridPaneCardsPlayer.getChildren().clear();
         Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);
@@ -145,62 +125,58 @@ public class GameUnoController implements Observer {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-
-                gameUno.playCard(card, humanPlayer);
-                tableImageView.setImage(card.getImage());
-                humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                threadPlayMachine.setHasPlayerPlayed(true);
-                printCardsHumanPlayer();
-                printCardsMachinePlayer(); // Refresh machine cards
-
+                if (gameUno.isCardPlayable(card, table.getCurrentCardOnTheTable())) {
+                    if (card.isWild()) {
+                        showColorSelectionDialog(card);
+                    } else {
+                        playCard(card);
+                    }
+                }
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
+        System.out.println("Cartas de la máquina: " + humanPlayer.getCardsPlayer());
     }
 
-    /**
-     * Displays the machine player's cards on the grid pane.
-     * This method clears the current grid pane and adds an ImageView for each card
-     * in the machine player's hand. The cards are displayed face down.
-     */
-    public void printCardsMachinePlayer() {
-        // Clear existing cards from the grid pane
-        this.gridPaneCardsMachine.getChildren().clear();
+    private void showColorSelectionDialog(Card card) {
+        ColorSelectionDialog colorSelectionDialog = new ColorSelectionDialog();
+        Optional<ButtonType> result = colorSelectionDialog.showAndWait();
 
-        // Get the current cards of the machine player as an array
+        result.ifPresent(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                String selectedColor = colorSelectionDialog.getSelectedColor();
+                card.setColor(selectedColor);
+                playCard(card);
+            }
+        });
+    }
+
+    private void playCard(Card card) {
+        gameUno.playCard(card, humanPlayer);
+        tableImageView.setImage(card.getImage());
+        humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+        threadPlayMachine.setHasPlayerPlayed(true);
+        printCardsHumanPlayer();
+        printCardsMachinePlayer();
+        checkForWinner();
+    }
+
+    public void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
         Card[] currentVisibleCardsMachinePlayer = this.machinePlayer.getCardsPlayer().toArray(new Card[0]);
 
-        // Iterate through each card and create an ImageView for it
         for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
-
             Card card = currentVisibleCardsMachinePlayer[i];
-
             ImageView cardImageViewMachine = card.getCardImageViewMachine();
-
             cardImageViewMachine.setFitHeight(90);
-
             cardImageViewMachine.setFitWidth(70);
-
             cardImageViewMachine.setPreserveRatio(true);
-
-            ImageView cardImageView = currentVisibleCardsMachinePlayer[i].getCardImageViewMachine();
-
-            this.gridPaneCardsMachine.add(cardImageView, i, 0);
-
-
+            this.gridPaneCardsMachine.add(cardImageViewMachine, i, 0);
         }
         System.out.println("Cartas de la máquina: " + machinePlayer.getCardsPlayer());
-
     }
 
-
-    /**
-     * Finds the position of a specific card in the human player's hand.
-     *
-     * @param card the card to find
-     * @return the position of the card, or -1 if not found
-     */
     private Integer findPosCardsHumanPlayer(Card card) {
         for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {
             if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {
@@ -210,13 +186,6 @@ public class GameUnoController implements Observer {
         return -1;
     }
 
-
-
-    /**
-     * Handles the "Back" button action to show the previous set of cards.
-     *
-     * @param event the action event
-     */
     @FXML
     void onHandleBack(ActionEvent event) {
         if (this.posInitCardToShow > 0) {
@@ -225,11 +194,6 @@ public class GameUnoController implements Observer {
         }
     }
 
-    /**
-     * Handles the "Next" button action to show the next set of cards.
-     *
-     * @param event the action event
-     */
     @FXML
     void onHandleNext(ActionEvent event) {
         if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
@@ -238,11 +202,6 @@ public class GameUnoController implements Observer {
         }
     }
 
-    /**
-     * Handles the action of taking a card.
-     *
-     * @param event the action event
-     */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
         if (!threadPlayMachine.isHasPlayerPlayed()) {
@@ -252,7 +211,6 @@ public class GameUnoController implements Observer {
             System.out.println("Cartas del jugador: " + humanPlayer.getCardsPlayer());
             printCardsHumanPlayer();
             if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
-                // Ceder el turno a la máquina
                 threadPlayMachine.setHasPlayerPlayed(true);
             }
         } else {
@@ -262,42 +220,41 @@ public class GameUnoController implements Observer {
             printCardsMessageMachinePlayer();
             printCardsMachinePlayer();
             if (!gameUno.isCardPlayable(newCard, table.getCurrentCardOnTheTable())) {
-
-
             }
         }
         System.out.println("Botón Baraja");
-
     }
 
-    /**
-     * Prints the machine player's cards to the console.
-     * This method outputs a message to the console listing the cards currently held by the machine player.
-     */
     public void printCardsMessageMachinePlayer() {
         System.out.println("Cartas del jugador máquina: " + machinePlayer.getCardsPlayer());
     }
 
-
-    /**
-     * Handles the action of saying "Uno".
-     *
-     * @param event the action event
-     */
     @FXML
     void onHandleUno(ActionEvent event) {
         System.out.println("Pressed Uno button");
-
     }
 
-
-    /**
-     * Update method required by Observer interface.
-     */
     @Override
     public void update() {
         printCardsHumanPlayer();
     }
 
+    private void checkForWinner() {
+        if (humanPlayer.getCardsPlayer().isEmpty()) {
+            showAlert("Felicidades", "¡Ganaste el juego!");
+        } else if (machinePlayer.getCardsPlayer().isEmpty()) {
+            showAlert("Lo siento", "La máquina ganó.");
+        }
+    }
 
+
+    private void showAlert(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }

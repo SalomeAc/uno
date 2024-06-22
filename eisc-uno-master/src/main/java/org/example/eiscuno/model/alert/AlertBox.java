@@ -1,8 +1,12 @@
-package com.example.sudoku.model.alert;
+package org.example.eiscuno.model.alert;
 
 import javafx.scene.control.Alert;
 
 public class AlertBox implements IAlertBox {
+    public AlertBox(Alert.AlertType alertType) {
+
+    }
+
     @Override
     public void showMessage(String title, String header, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

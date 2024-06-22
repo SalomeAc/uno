@@ -74,9 +74,10 @@ public class ThreadPlayMachine extends Thread {
                     continue;
                 }
 
-                if (card.getValue() == "WILD"){
+                if (card.getValue().equals("WILD")) {
                     selectedCard = card;
-
+                    selectedIndex = i;
+                    break;
                 }
 
                 if (gameUno.isCardPlayable(card, cardOnTable)) {
@@ -92,6 +93,13 @@ public class ThreadPlayMachine extends Thread {
                 tableImageView.setImage(selectedCard.getImage());
                 machinePlayer.getCardsPlayer().remove(selectedIndex);
                 System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+
+                // Verificar cartas especiales
+                if (isContinueTurn(selectedCard)) {
+                    System.out.println("La máquina jugó un " + selectedCard.getValue() + ". El turno continúa.");
+                    continue;
+                }
+
                 break;
             } else {
                 System.out.println("No hay cartas jugables en la mano del jugador máquina.");
@@ -110,10 +118,12 @@ public class ThreadPlayMachine extends Thread {
                     System.out.println("El mazo está vacío. No se puede tomar una carta.");
                     break;
                 }
-
-
             }
         }
+    }
+    private boolean isContinueTurn(Card card) {
+        String value = card.getValue();
+        return value.equals("SKIP") || value.equals("REVERSE");
     }
     public synchronized void setHasPlayerPlayed(boolean hasPlayerPlayed) {
         this.hasPlayerPlayed = hasPlayerPlayed;
