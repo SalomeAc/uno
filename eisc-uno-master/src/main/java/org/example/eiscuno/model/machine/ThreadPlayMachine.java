@@ -1,6 +1,7 @@
 package org.example.eiscuno.model.machine;
 
 import javafx.scene.image.ImageView;
+import org.example.eiscuno.controller.GameUnoController;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -15,7 +16,7 @@ public class ThreadPlayMachine extends Thread {
     private final Deck deck;
     private final GameUno gameUno;
 
-    public ThreadPlayMachine(Table table, Player machinePlayer, ImageView tableImageView, Deck deck, GameUno gameUno) {
+    public ThreadPlayMachine(GameUnoController controller, Table table, Player machinePlayer, ImageView tableImageView, Deck deck, GameUno gameUno) {
         this.table = table;
         this.machinePlayer = machinePlayer;
         this.tableImageView = tableImageView;
@@ -64,6 +65,11 @@ public class ThreadPlayMachine extends Thread {
                 if (card.getValue() == null || card.getColor() == null) {
                     System.out.println("Carta inválida detectada: " + card);
                     continue;
+                }
+
+                if (card.getValue() == "WILD"){
+                    selectedCard = card;
+
                 }
 
                 if (gameUno.isCardPlayable(card, cardOnTable)) {
