@@ -52,6 +52,7 @@ public class GameUnoController implements Observer {
     private Table table;
     private GameUno gameUno;
     private int posInitCardToShow;
+    private boolean isHumanTurn = true;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
@@ -144,7 +145,6 @@ public class GameUnoController implements Observer {
         }
         System.out.println("Cartas de la máquina: " + humanPlayer.getCardsPlayer());
     }
-
     private void showColorSelectionDialog(Card card) {
         ColorSelectionDialog colorSelectionDialog = new ColorSelectionDialog();
         Optional<ButtonType> result = colorSelectionDialog.showAndWait();
@@ -157,20 +157,41 @@ public class GameUnoController implements Observer {
             }
         });
     }
-
     private void playCard(Card card) {
         gameUno.playCard(card, humanPlayer);
         tableImageView.setImage(card.getImage());
         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-        threadPlayMachine.setHasPlayerPlayed(true);
         printCardsHumanPlayer();
         printCardsMachinePlayer();
         checkForWinner();
 
-        if (humanPlayer.getCardsPlayer().size() == 1) {
+        if (card.getValue().equals("SKIP")) {
+            System.out.println("Played SKIP card. Turn continues for the same player.");
+            if (isHumanTurn) {
+                // Human player plays again
+                startUnoTimerIfNeeded();
+            } else {
+                // Machine player plays again
+                threadPlayMachine.setHasPlayerPlayed(true);
+            }
+        } else {
+            if (isHumanTurn) {
+                isHumanTurn = false;
+                threadPlayMachine.setHasPlayerPlayed(true);
+            } else {
+                isHumanTurn = true;
+            }
+        }
+
+        startUnoTimerIfNeeded();
+    }
+    private void startUnoTimerIfNeeded() {
+        if (isHumanTurn && humanPlayer.getCardsPlayer().size() == 1) {
             startUnoTimer();
         }
     }
+
+
 
     public void printCardsMachinePlayer() {
         this.gridPaneCardsMachine.getChildren().clear();
@@ -256,7 +277,7 @@ public class GameUnoController implements Observer {
         }, 2, TimeUnit.SECONDS);
     }
 
-
+    //Método penaliza sino toca el botón max en 2s
     private void addPenaltyCards(Player player, int numberOfCards) {
         for (int i = 0; i < numberOfCards; i++) {
             Card newCard = deck.takeCard();
@@ -281,7 +302,7 @@ public class GameUnoController implements Observer {
         }
     }
 
-
+    //////Implemet Alert
     private void showAlert(String title, String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

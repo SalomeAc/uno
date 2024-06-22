@@ -94,6 +94,11 @@ public class ThreadPlayMachine extends Thread {
                 machinePlayer.getCardsPlayer().remove(selectedIndex);
                 System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
 
+                if (selectedCard.getValue().equals("SKIP")) {
+                    System.out.println("Se jugó una carta SKIP. El turno continúa para el jugador que la lanzó.");
+                    continue;
+                }
+
                 // Verificar cartas especiales
                 if (isContinueTurn(selectedCard)) {
                     System.out.println("La máquina jugó un " + selectedCard.getValue() + ". El turno continúa.");
