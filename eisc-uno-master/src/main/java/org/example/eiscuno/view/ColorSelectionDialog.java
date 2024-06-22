@@ -78,16 +78,6 @@ public class ColorSelectionDialog extends Alert {
             gc.fillArc(0, 0, 2 * radius, 2 * radius, angles[i], 90, javafx.scene.shape.ArcType.ROUND);
         }
     }
-    private void showAlert(String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
-    }
-
     /**
      * Gets the color selected by the user.
      * @return The selected color
@@ -95,4 +85,5 @@ public class ColorSelectionDialog extends Alert {
     public String getSelectedColor() {
         return selectedColor;
     }
+    //
 }

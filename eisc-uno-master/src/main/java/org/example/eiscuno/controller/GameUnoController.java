@@ -21,6 +21,10 @@ import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.ColorSelectionDialog;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class GameUnoController implements Observer {
 
@@ -51,6 +55,8 @@ public class GameUnoController implements Observer {
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> unoTask;
 
     @FXML
     public void initialize() {
@@ -160,6 +166,10 @@ public class GameUnoController implements Observer {
         printCardsHumanPlayer();
         printCardsMachinePlayer();
         checkForWinner();
+
+        if (humanPlayer.getCardsPlayer().size() == 1) {
+            startUnoTimer();
+        }
     }
 
     public void printCardsMachinePlayer() {
@@ -228,11 +238,35 @@ public class GameUnoController implements Observer {
     public void printCardsMessageMachinePlayer() {
         System.out.println("Cartas del jugador máquina: " + machinePlayer.getCardsPlayer());
     }
-
     @FXML
     void onHandleUno(ActionEvent event) {
         System.out.println("Pressed Uno button");
+        if (unoTask != null && !unoTask.isDone()) {
+            unoTask.cancel(true);
+            System.out.println("UNO button pressed in time!");
+        }
     }
+
+    private void startUnoTimer() {
+        unoTask = scheduler.schedule(() -> {
+            Platform.runLater(() -> {
+                System.out.println("UNO button not pressed in time. Adding penalty cards.");
+                addPenaltyCards(humanPlayer, 2);
+            });
+        }, 2, TimeUnit.SECONDS);
+    }
+
+
+    private void addPenaltyCards(Player player, int numberOfCards) {
+        for (int i = 0; i < numberOfCards; i++) {
+            Card newCard = deck.takeCard();
+            if (newCard != null) {
+                player.addCard(newCard);
+            }
+        }
+        printCardsHumanPlayer(); // Actualizar la interfaz gráfica
+    }
+
 
     @Override
     public void update() {
