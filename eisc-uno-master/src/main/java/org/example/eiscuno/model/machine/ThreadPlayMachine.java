@@ -74,10 +74,12 @@ public class ThreadPlayMachine extends Thread {
                     continue;
                 }
 
+
                 if (card.getValue().equals("WILD")){
                     selectedCard = card;
                     selectedIndex = i;
                     break;
+
 
                 }
 
@@ -98,7 +100,6 @@ public class ThreadPlayMachine extends Thread {
                 if (selectedCard.getValue().equals("SKIP")) {
 
                     System.out.println("Se jugó una carta SKIP. El turno continúa para el jugador que la lanzó.");
-
                     continue;
 
                 }
@@ -142,6 +143,7 @@ public class ThreadPlayMachine extends Thread {
             }
         }
     }
+
     public synchronized void setHasPlayerPlayed(boolean hasPlayerPlayed) {
         this.hasPlayerPlayed = hasPlayerPlayed;
     }

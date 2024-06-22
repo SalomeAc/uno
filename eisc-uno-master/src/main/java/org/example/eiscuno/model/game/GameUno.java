@@ -26,6 +26,7 @@ public class GameUno extends Observable implements IGameUno {
     private Table table;
     private String lastColorPlayed;
 
+
     /**
      * Constructs a new GameUno instance.
      *
@@ -76,20 +77,38 @@ public class GameUno extends Observable implements IGameUno {
         notifyObservers();
     }
 
+    /**
+     * Checks if the given card can be played on top of the current card on the table.
+     * @param card The card to be played.
+     * @param cardOnTable The current card on the table.
+     * @return true if the card can be played, false otherwise.
+     */
     public boolean isCardPlayable(Card card, Card cardOnTable) {
+
         if (card.getValue().equals(cardOnTable.getValue()) ||
+
                 card.getColor().equals(cardOnTable.getColor()) ||
+
                 card.getColor().equals("WILD") ||
-                card.getValue().equals("WILD"))
-        {
+
+                card.getValue().equals("WILD")) {
+
             return true;
+
         }
-        // Permitir jugar cualquier carta del último color jugado después de un +4
+
+
+
         if (lastColorPlayed != null && card.getColor().equals(lastColorPlayed)) {
+
             return true;
+
         }
+
         return false;
+
     }
+
 
     /**
      * Places a card on the table during the game.
@@ -161,6 +180,7 @@ public class GameUno extends Observable implements IGameUno {
             numberOfCards = 2;
         } else if (card.getValue().contains("+4")) {
             numberOfCards = 4;
+
             Platform.runLater(() -> {
                 ColorSelectionDialog dialog = new ColorSelectionDialog();
                 dialog.showAndWait();
@@ -169,6 +189,7 @@ public class GameUno extends Observable implements IGameUno {
                     lastColorPlayed = selectedColor;
                 }
             });
+
             lastColorPlayed = table.getCurrentCardOnTheTable().getColor();
         }
 
@@ -183,10 +204,12 @@ public class GameUno extends Observable implements IGameUno {
         }
 
         if (card.getValue().contains("SKIP")) {
+
             updateCurrentPlayer(); // Salta el turno del próximo jugador
             updateCurrentPlayer(); // Salta el turno del jugador actual para pasar al siguiente
         } else if (card.getValue().contains("REVERSE")) {
             isClockwise = !isClockwise; // Cambia la dirección del juego
+
         }
 
         if(numberOfCards > 0){
