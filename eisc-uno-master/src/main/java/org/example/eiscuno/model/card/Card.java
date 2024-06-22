@@ -122,6 +122,31 @@ public class Card {
     public String getColor() {
         return color;
     }
+
+
+    /**
+     * Checks if the card is a wild card.
+     * A card is considered wild if its value is "wild".
+     *
+     * @return true if the card is a wild card, false otherwise
+     */
+
+    public boolean isWild() {
+        return value.equals("wild") || value.equals("wild_draw_four");
+    }
+
+
+    /**
+     * Sets the color of the card.
+     *
+     * @param color the new color of the card
+     */
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+
     public String getUrl(){
         return url;
     }
