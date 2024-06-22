@@ -1,4 +1,4 @@
-package org.example.eiscuno.model;
+package org.example.eiscuno.view;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

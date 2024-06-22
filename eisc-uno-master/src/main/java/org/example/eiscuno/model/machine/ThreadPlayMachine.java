@@ -74,8 +74,10 @@ public class ThreadPlayMachine extends Thread {
                     continue;
                 }
 
-                if (card.getValue() == "WILD"){
+                if (card.getValue().equals("WILD")){
                     selectedCard = card;
+                    selectedIndex = i;
+                    break;
 
                 }
 
@@ -92,26 +94,51 @@ public class ThreadPlayMachine extends Thread {
                 tableImageView.setImage(selectedCard.getImage());
                 machinePlayer.getCardsPlayer().remove(selectedIndex);
                 System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
+
+                if (selectedCard.getValue().equals("SKIP")) {
+
+                    System.out.println("Se jugó una carta SKIP. El turno continúa para el jugador que la lanzó.");
+
+                    continue;
+
+                }
+
+                // Verificar cartas especiales
+                if (isContinueTurn(selectedCard)) {
+                    System.out.println("La máquina jugó un " + selectedCard.getValue() + ". El turno continúa.");
+                    continue;
+                }
+
                 break;
             } else {
                 System.out.println("No hay cartas jugables en la mano del jugador máquina.");
 
                 Card newCard = deck.takeCard();
 
+
+
                 if (newCard != null) {
+
                     machinePlayer.addCard(newCard);
+
                     System.out.println("La máquina toma una carta: " + newCard);
+
                     if (!gameUno.isCardPlayable(newCard, cardOnTable)) {
+
                         System.out.println("La carta tomada no es jugable. Cediendo el turno.");
+
                         setHasPlayerPlayed(false);
+
                         break;
+
                     }
+
                 } else {
+
                     System.out.println("El mazo está vacío. No se puede tomar una carta.");
                     break;
+
                 }
-
-
             }
         }
     }
@@ -121,5 +148,11 @@ public class ThreadPlayMachine extends Thread {
 
     public boolean isHasPlayerPlayed() {
         return hasPlayerPlayed;
+    }
+
+
+    private boolean isContinueTurn(Card card) {
+        String value = card.getValue();
+        return value.equals("SKIP") || value.equals("REVERSE");
     }
 }

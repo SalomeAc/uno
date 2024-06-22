@@ -122,6 +122,15 @@ public class Card {
     public String getColor() {
         return color;
     }
+
+    public boolean isWild() {
+        return value.equals("wild") || value.equals("wild_draw_four");
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     public String getUrl(){
         return url;
     }
