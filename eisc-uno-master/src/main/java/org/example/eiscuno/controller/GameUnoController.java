@@ -56,6 +56,10 @@ public class GameUnoController implements Observer {
     public void initialize() {
         initVariables();
 
+        this.gameUno.playCard(deck.takeCard(),humanPlayer);
+
+        this.tableImageView.setImage(this.table.getCurrentCardOnTheTable().getImage());
+
         setBackground();
         Image barajaImage = new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/deck_of_cards.png"));
         BackgroundSize backgroundSize = new BackgroundSize(120, 169, false, false, true, true);
@@ -170,9 +174,20 @@ public class GameUnoController implements Observer {
         // Iterate through each card and create an ImageView for it
         for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
 
+            Card card = currentVisibleCardsMachinePlayer[i];
+
+            ImageView cardImageViewMachine = card.getCardImageViewMachine();
+
+            cardImageViewMachine.setFitHeight(90);
+
+            cardImageViewMachine.setFitWidth(70);
+
+            cardImageViewMachine.setPreserveRatio(true);
+
             ImageView cardImageView = currentVisibleCardsMachinePlayer[i].getCardImageViewMachine();
 
             this.gridPaneCardsMachine.add(cardImageView, i, 0);
+
 
         }
         System.out.println("Cartas de la máquina: " + machinePlayer.getCardsPlayer());

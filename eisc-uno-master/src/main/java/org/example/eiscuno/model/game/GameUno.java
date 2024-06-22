@@ -75,7 +75,7 @@ public class GameUno extends Observable implements IGameUno {
     public boolean isCardPlayable(Card card, Card cardOnTable) {
         return card.getValue().equals(cardOnTable.getValue()) ||
                 card.getColor().equals(cardOnTable.getColor()) ||
-                card.getColor().equals("WILD");
+                card.getColor().equals("WILD") || card.getValue().equals("WILD");
     }
 
 
@@ -164,7 +164,12 @@ public class GameUno extends Observable implements IGameUno {
             System.out.println(targetPlayer.getTypePlayer() + " has now: " + targetPlayer.getCardsPlayer().size() + " cards");
         }
 
-        notifyObservers();
+        if (targetPlayer.getTypePlayer().equals("HUMAN_PLAYER")){
+
+            notifyObservers();
+        }
+
+
 
     }
 

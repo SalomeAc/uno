@@ -1,6 +1,10 @@
 package org.example.eiscuno.model.machine;
 
 import javafx.scene.image.ImageView;
+
+import javafx.application.Platform;
+
+import javafx.scene.control.Alert;
 import org.example.eiscuno.controller.GameUnoController;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
@@ -15,8 +19,10 @@ public class ThreadPlayMachine extends Thread {
     private volatile boolean hasPlayerPlayed;
     private final Deck deck;
     private final GameUno gameUno;
+    private GameUnoController controller;
 
     public ThreadPlayMachine(GameUnoController controller, Table table, Player machinePlayer, ImageView tableImageView, Deck deck, GameUno gameUno) {
+        this.controller = controller;
         this.table = table;
         this.machinePlayer = machinePlayer;
         this.tableImageView = tableImageView;
@@ -33,11 +39,12 @@ public class ThreadPlayMachine extends Thread {
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt(); // Restablecer el estado de interrupción
+                        Thread.currentThread().interrupt();
                         return;
                     }
-                    // Lógica para colocar la carta
+
                     putCardOnTheTable();
+                    Platform.runLater(() -> controller.printCardsMachinePlayer());
                     hasPlayerPlayed = false;
                 }
             }
@@ -85,10 +92,10 @@ public class ThreadPlayMachine extends Thread {
                 tableImageView.setImage(selectedCard.getImage());
                 machinePlayer.getCardsPlayer().remove(selectedIndex);
                 System.out.println("Carta añadida a la mesa: " + selectedCard.getValue() + " de " + selectedCard.getColor());
-                break; // Romper el bucle si se ha jugado una carta
+                break;
             } else {
                 System.out.println("No hay cartas jugables en la mano del jugador máquina.");
-                // La máquina toma una carta del mazo
+
                 Card newCard = deck.takeCard();
 
                 if (newCard != null) {
@@ -96,12 +103,12 @@ public class ThreadPlayMachine extends Thread {
                     System.out.println("La máquina toma una carta: " + newCard);
                     if (!gameUno.isCardPlayable(newCard, cardOnTable)) {
                         System.out.println("La carta tomada no es jugable. Cediendo el turno.");
-                        setHasPlayerPlayed(false); // Ceder el turno al jugador
-                        break; // Romper el bucle si la carta no es jugable
+                        setHasPlayerPlayed(false);
+                        break;
                     }
                 } else {
                     System.out.println("El mazo está vacío. No se puede tomar una carta.");
-                    break; // Romper el bucle si el mazo está vacío
+                    break;
                 }
 
 
