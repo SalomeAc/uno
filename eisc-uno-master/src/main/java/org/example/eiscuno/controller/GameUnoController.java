@@ -47,7 +47,7 @@ public class GameUnoController implements Observer {
     private int posInitCardToShow;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
-    private ThreadPlayMachine threadPlayMachine;
+    ThreadPlayMachine threadPlayMachine;
 
     /**
      * Initializes the controller.
