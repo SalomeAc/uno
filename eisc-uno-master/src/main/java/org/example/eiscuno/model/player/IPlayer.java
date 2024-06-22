@@ -17,6 +17,8 @@ public interface IPlayer {
      */
     void addCard(Card card);
 
+    void removeCard(Card card);
+
     /**
      * Retrieves a card from the player's hand based on its index.
      *

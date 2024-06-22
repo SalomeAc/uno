@@ -26,7 +26,11 @@ public interface IGameUno {
      *
      * @param card the card to be played
      */
-    void playCard(Card card);
+
+    void playCard(Card card, Player player);
+
+
+
 
     /**
      * Handles the action when a player shouts "Uno".
@@ -49,4 +53,12 @@ public interface IGameUno {
      * @return true if the game is over, false otherwise
      */
     Boolean isGameOver();
+
+    /**
+     * Validates if the card is a special card and applies its effect.
+     *
+     * @param card the card to be validated
+     * @param player the player who will be affected by the special card
+     */
+    void validateSpecialCard(Card card, Player player);
 }

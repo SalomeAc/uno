@@ -2,14 +2,21 @@ package org.example.eiscuno.model.game;
 
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
+import org.example.eiscuno.model.designPattern.Observable;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+
+import java.util.List;
 
 /**
  * Represents a game of Uno.
  * This class manages the game logic and interactions between players, deck, and the table.
  */
-public class GameUno implements IGameUno {
+public class GameUno extends Observable implements IGameUno {
+
+    private List<Player> players;
+    private int currentPlayerIndex;
+    private boolean isClockwise;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -29,6 +36,9 @@ public class GameUno implements IGameUno {
         this.machinePlayer = machinePlayer;
         this.deck = deck;
         this.table = table;
+        this.players = List.of(humanPlayer, machinePlayer); // Inicializa la lista de jugadores
+        this.currentPlayerIndex = 0;
+        this.isClockwise = true;
     }
 
     /**
@@ -44,7 +54,9 @@ public class GameUno implements IGameUno {
                 machinePlayer.addCard(this.deck.takeCard());
             }
         }
+        notifyObservers();
     }
+
 
     /**
      * Allows a player to draw a specified number of cards from the deck.
@@ -52,12 +64,20 @@ public class GameUno implements IGameUno {
      * @param player        The player who will draw cards.
      * @param numberOfCards The number of cards to draw.
      */
+
     @Override
     public void eatCard(Player player, int numberOfCards) {
         for (int i = 0; i < numberOfCards; i++) {
             player.addCard(this.deck.takeCard());
         }
+        notifyObservers();
     }
+    public boolean isCardPlayable(Card card, Card cardOnTable) {
+        return card.getValue().equals(cardOnTable.getValue()) ||
+                card.getColor().equals(cardOnTable.getColor()) ||
+                card.getColor().equals("WILD") || card.getValue().equals("WILD");
+    }
+
 
     /**
      * Places a card on the table during the game.
@@ -65,9 +85,12 @@ public class GameUno implements IGameUno {
      * @param card The card to be placed on the table.
      */
     @Override
-    public void playCard(Card card) {
+    public void playCard(Card card, Player player) {
         this.table.addCardOnTheTable(card);
+        validateSpecialCard(card, player);
+        notifyObservers();
     }
+
 
     /**
      * Handles the scenario when a player shouts "Uno", forcing the other player to draw a card.
@@ -81,6 +104,7 @@ public class GameUno implements IGameUno {
         } else {
             humanPlayer.addCard(this.deck.takeCard());
         }
+        notifyObservers();
     }
 
     /**
@@ -113,6 +137,43 @@ public class GameUno implements IGameUno {
     }
 
     /**
+     * @param card   the card to be validated
+     * @param currentPlayer the player who will be affected by the special card
+     */
+    @Override
+    public void validateSpecialCard(Card card, Player currentPlayer) {
+        int numberOfCards = 0;
+        Player targetPlayer = this.getNextPlayer();
+
+        if(card.getValue().contains("+2")) {
+            numberOfCards = 2;
+        } else if (card.getValue().contains("+4")) {
+            numberOfCards = 4;
+        }
+
+        if(numberOfCards > 0){
+            System.out.println(targetPlayer.getTypePlayer() + " has: " + targetPlayer.getCardsPlayer().size() + " cards");
+        }
+
+        for (int i = 0; i < numberOfCards; i++) {
+            targetPlayer.addCard(this.deck.takeCard());
+        }
+
+        if(numberOfCards > 0){
+            System.out.println(targetPlayer.getTypePlayer() + " eats: " + numberOfCards + " cards");
+            System.out.println(targetPlayer.getTypePlayer() + " has now: " + targetPlayer.getCardsPlayer().size() + " cards");
+        }
+
+        if (targetPlayer.getTypePlayer().equals("HUMAN_PLAYER")){
+
+            notifyObservers();
+        }
+
+
+
+    }
+
+    /**
      * Checks if the card can be played.
      *
      * @param card The card to check.
@@ -131,4 +192,14 @@ public class GameUno implements IGameUno {
         return (card.getColor() != null && card.getColor().equals(currentCardOnTheTable.getColor())) ||
                 (card.getValue() != null && card.getValue().equals(currentCardOnTheTable.getValue()));
     }
+
+    public Player getNextPlayer() {
+        int nextIndex = (currentPlayerIndex + (isClockwise ? 1 : -1) + players.size()) % players.size();
+        return players.get(nextIndex);
+    }
+
+    public void updateCurrentPlayer() {
+        currentPlayerIndex = (currentPlayerIndex + (isClockwise ? 1 : -1) + players.size()) % players.size();
+    }
+
 }

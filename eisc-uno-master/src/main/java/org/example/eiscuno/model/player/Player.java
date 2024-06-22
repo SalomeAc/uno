@@ -49,6 +49,12 @@ public class Player implements IPlayer {
         cardsPlayer.remove(index);
     }
 
+    @Override
+    public void removeCard(Card card) {
+        cardsPlayer.remove(card);
+    }
+
+
     /**
      * Retrieves a card from the player's hand based on its index.
      *
@@ -62,5 +68,9 @@ public class Player implements IPlayer {
 
     public String getTypePlayer() {
         return typePlayer;
+    }
+
+    public void skip(){
+
     }
 }
